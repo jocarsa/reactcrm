@@ -37,3 +37,4 @@ INSERT INTO `productos` (`Identificador`, `nombre`, `descripcion`, `precio`) VAL
 
 INSERT INTO `clientes` (`Identificador`, `nombre`, `email`, `telefono`) VALUES (NULL, 'Juan Perez', 'juan@perez.com', '52345345');
 
+npm install react-modal

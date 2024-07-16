@@ -6,28 +6,24 @@ import Dashboard from './components/Dashboard';
 import CustomerList from './components/ClientesLista';
 import ProductosLista from './components/ProductosLista';
 import CustomerDetails from './components/ClientesDetalle';
-import CustomerForm from './components/ClientesFormulario';
-import DeleteCustomerDetails from './components/DeleteCustomerDetails'; // Import the new component
-
+import DeleteCustomerDetails from './components/DeleteCustomerDetails';
 import './App.css';
-
 
 function App() {
   return (
     <Router>
       <Navbar />
       <main>
-      <Sidebar />
-      <section>
-        <Routes>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/clientes" element={<CustomerList />} />
+        <Sidebar />
+        <section>
+          <Routes>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/clientes" element={<CustomerList />} />
             <Route path="/productos" element={<ProductosLista />} />
-          <Route path="/customers/new" element={<CustomerForm />} />
-          <Route path="/customers/:id" element={<CustomerDetails />} />
+            <Route path="/customers/:id" element={<CustomerDetails />} />
             <Route path="/deletecustomers/:id" element={<DeleteCustomerDetails />} />
-        </Routes>
-      </section>
+          </Routes>
+        </section>
       </main>
     </Router>
   );
