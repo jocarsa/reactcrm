@@ -1,22 +1,15 @@
+// App.js
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
-import CustomerList from './components/ClientesLista';
-import ProductosLista from './components/ProductosLista';
-import CustomerDetails from './components/ClientesDetalle';
-import CustomerForm from './components/ClientesFormulario';
-import DeleteCustomerDetails from './components/DeleteCustomerDetails';
+import EntityList from './components/EntityList';
+import EntityDetail from './components/EntityDetail';
 import axios from 'axios';
 import './App.css';
 
-const DynamicTableComponent = ({ table }) => {
-  // Placeholder for actual table component
-  return <div>{table} data</div>;
-};
-
-function App() {
+const App = () => {
   const [tables, setTables] = useState([]);
 
   useEffect(() => {
@@ -33,23 +26,17 @@ function App() {
         <section>
           <Routes>
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/clientes" element={<CustomerList />} />
-            <Route path="/productos" element={<ProductosLista />} />
-            <Route path="/customers/new" element={<CustomerForm />} />
-            <Route path="/customers/:id" element={<CustomerDetails />} />
-            <Route path="/deletecustomers/:id" element={<DeleteCustomerDetails />} />
             {tables.map(table => (
-              <Route
-                key={table}
-                path={`/${table}`}
-                element={<DynamicTableComponent table={table} />}
-              />
+              <Route key={table} path={`/${table}`} element={<EntityList entity={table} />} />
+            ))}
+            {tables.map(table => (
+              <Route key={table} path={`/${table}/:id`} element={<EntityDetail entity={table} />} />
             ))}
           </Routes>
         </section>
       </main>
     </Router>
   );
-}
+};
 
 export default App;
