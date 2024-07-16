@@ -79,7 +79,17 @@ app.get('/productos', (req, res) => {
   });
 });
 
-
+// Insert a new customer
+app.post('/clientes', (req, res) => {
+  const { nombre, email, telefono } = req.body;
+  const query = 'INSERT INTO clientes (nombre, email, telefono) VALUES (?, ?, ?)';
+  db.query(query, [nombre, email, telefono], (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    res.json({ message: 'Customer added successfully', id: results.insertId });
+  });
+});
 
 // Start the server
 app.listen(PORT, () => {
