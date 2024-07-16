@@ -1,0 +1,22 @@
+table{
+    width:100%;
+}
+table thead{
+    background:indigo;
+    color:white;
+}
+.operaciones{
+    width:20%;
+}
+a{
+    text-decoration:none;
+    color:white;
+    background:indigo;
+    display:block;
+    margin:1px;
+    padding:4px;
+    border-radius:15px;
+    text-align:center;
+    font-size:12px;
+    line-height:12px;
+}

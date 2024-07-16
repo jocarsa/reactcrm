@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
+import './UpdateCustomerFormModal.css'
 import axios from 'axios';
 
 Modal.setAppElement('#root'); // Set the root element for accessibility

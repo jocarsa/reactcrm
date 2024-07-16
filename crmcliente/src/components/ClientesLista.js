@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import './ClientesLista.css'
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import CustomerFormModal from './CustomerFormModal'; // Import the modal component
@@ -37,7 +38,7 @@ const ClientesLista = () => {
             <th>Nombre</th>
             <th>Email</th>
             <th>Telefono</th>
-            <th>Operaciones</th>
+            <th className="operaciones">Operaciones</th>
           </tr>
         </thead>
         <tbody>
@@ -49,7 +50,7 @@ const ClientesLista = () => {
               <td>
                 <Link to={`/customers/${customer.id}`}>Ver cliente</Link>
                 <Link to={`/deletecustomers/${customer.id}`}>Eliminar cliente</Link>
-                <button onClick={() => openUpdateModal(customer)}>Modificar cliente</button>
+                <Link onClick={() => openUpdateModal(customer)}>Modificar cliente</Link>
               </td>
             </tr>
           ))}
