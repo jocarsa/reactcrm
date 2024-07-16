@@ -29,6 +29,7 @@ const ClientesLista = () => {
             <td>{customer.telefono}</td>
       <td>
           <Link to={`/customers/${customer.id}`}> Ver cliente </Link>
+            <Link to={`/deletecustomers/${customer.id}`}> Eliminar cliente </Link>
         </td>
         </tr>
       ))}

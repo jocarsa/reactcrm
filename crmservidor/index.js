@@ -56,6 +56,18 @@ app.get('/clientes/:id', (req, res) => {
   });
 });
 
+// Get a specific customer by id
+app.get('/deleteclientes/:id', (req, res) => {
+  const { id } = req.params;
+  const query = 'DELETE FROM clientes WHERE Identificador = ?';
+  db.query(query, [id], (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    res.json(results);
+  });
+});
+
 // Tomar todos los productos
 app.get('/productos', (req, res) => {
   const query = 'SELECT Identificador AS id, nombre, descripcion, precio FROM productos';

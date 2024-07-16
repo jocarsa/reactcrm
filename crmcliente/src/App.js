@@ -7,6 +7,8 @@ import CustomerList from './components/ClientesLista';
 import ProductosLista from './components/ProductosLista';
 import CustomerDetails from './components/ClientesDetalle';
 import CustomerForm from './components/ClientesFormulario';
+import DeleteCustomerDetails from './components/DeleteCustomerDetails'; // Import the new component
+
 import './App.css';
 
 
@@ -23,6 +25,7 @@ function App() {
             <Route path="/productos" element={<ProductosLista />} />
           <Route path="/customers/new" element={<CustomerForm />} />
           <Route path="/customers/:id" element={<CustomerDetails />} />
+            <Route path="/deletecustomers/:id" element={<DeleteCustomerDetails />} />
         </Routes>
       </section>
       </main>
