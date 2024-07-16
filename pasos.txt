@@ -1,0 +1,8 @@
+Crear proyecto:
+create-react-app crmcliente
+
+Entrar en la carpeta
+cd crmcliente
+
+Instalar modulos
+npm install axios react-router @mui/material @emotion/react @emotion/styled
