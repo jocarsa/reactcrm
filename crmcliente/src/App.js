@@ -6,7 +6,7 @@ import Dashboard from './components/Dashboard';
 import CustomerList from './components/ClientesLista';
 import CustomerDetails from './components/ClientesDetalle';
 import CustomerForm from './components/ClientesFormulario';
-import { Container } from '@mui/material';
+
 
 
 function App() {
@@ -14,14 +14,14 @@ function App() {
     <Router>
       <Navbar />
       <Sidebar />
-      <Container>
+      <section>
         <Routes>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/customers" element={<CustomerList />} />
+          <Route path="/clientes" element={<CustomerList />} />
           <Route path="/customers/new" element={<CustomerForm />} />
           <Route path="/customers/:id" element={<CustomerDetails />} />
         </Routes>
-      </Container>
+      </section>
     </Router>
   );
 }

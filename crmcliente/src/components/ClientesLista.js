@@ -1,25 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { List, ListItem, ListItemText } from '@mui/material';
 import { Link } from 'react-router-dom';
 
 const ClientesLista = () => {
   const [customers, setCustomers] = useState([]);
 
   useEffect(() => {
-    axios.get('/api/customers')
+    axios.get('http://localhost:5000/clientes')
       .then(response => setCustomers(response.data))
       .catch(error => console.error(error));
   }, []);
 
   return (
-    <List>
+    <ul>
       {customers.map(customer => (
-        <ListItem button component={Link} to={`/customers/${customer.id}`} key={customer.id}>
-          <ListItemText primary={customer.name} />
-        </ListItem>
+        <li key={customer.id}>
+          <Link to={`/customers/${customer.id}`}>{customer.nombre} - {customer.email}</Link>
+        </li>
       ))}
-    </List>
+    </ul>
   );
 };
 

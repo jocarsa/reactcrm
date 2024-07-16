@@ -1,20 +1,18 @@
 import React from 'react';
-//import { Drawer, List, ListItem, ListItemText } from '@mui/material';
 import { Link } from 'react-router-dom';
 
 const Sidebar = () => {
   return (
-      <nav>
+    <nav>
       <ul>
-        <li component={Link} to="/dashboard">
-            Escritorio
+        <li>
+          <Link to="/dashboard">Escritorio</Link>
         </li>
-      <li component={Link} to="/customers">
-            Clientes
-      </li>
+        <li>
+          <Link to="/clientes">Clientes</Link>
+        </li>
       </ul>
-      </nav>
-    
+    </nav>
   );
 };
 

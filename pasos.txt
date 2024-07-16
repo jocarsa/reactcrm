@@ -26,3 +26,6 @@ npm init -y
 
 npm install express
 
+npm mysql2 sequelize
+
+npm install cors
