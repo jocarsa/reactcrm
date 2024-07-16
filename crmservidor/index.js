@@ -35,7 +35,7 @@ app.get('/', (req, res) => {
 
 // Get all customers
 app.get('/clientes', (req, res) => {
-  const query = 'SELECT Identificador AS id, nombre, email, telefono FROM clientes';
+  const query = 'SELECT  * FROM clientes';
   db.query(query, (err, results) => {
     if (err) {
       return res.status(500).json({ error: err.message });
@@ -47,7 +47,7 @@ app.get('/clientes', (req, res) => {
 // Get a specific customer by id
 app.get('/clientes/:id', (req, res) => {
   const { id } = req.params;
-  const query = 'SELECT Identificador AS id, nombre, email, telefono FROM clientes WHERE Identificador = ?';
+  const query = 'SELECT * FROM clientes WHERE id = ?';
   db.query(query, [id], (err, results) => {
     if (err) {
       return res.status(500).json({ error: err.message });
@@ -59,7 +59,7 @@ app.get('/clientes/:id', (req, res) => {
 // Get a specific customer by id
 app.get('/deleteclientes/:id', (req, res) => {
   const { id } = req.params;
-  const query = 'DELETE FROM clientes WHERE Identificador = ?';
+  const query = 'DELETE FROM clientes WHERE id = ?';
   db.query(query, [id], (err, results) => {
     if (err) {
       return res.status(500).json({ error: err.message });

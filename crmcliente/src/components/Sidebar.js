@@ -1,16 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
 
-const Sidebar = () => {
-  const [tables, setTables] = useState([]);
-
-  useEffect(() => {
-    axios.get('http://localhost:5000/tables')
-      .then(response => setTables(response.data))
-      .catch(error => console.error(error));
-  }, []);
-
+const Sidebar = ({ tables }) => {
   return (
     <nav>
       <Link to="/dashboard">Escritorio</Link>

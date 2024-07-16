@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
@@ -8,6 +8,7 @@ import ProductosLista from './components/ProductosLista';
 import CustomerDetails from './components/ClientesDetalle';
 import CustomerForm from './components/ClientesFormulario';
 import DeleteCustomerDetails from './components/DeleteCustomerDetails';
+import axios from 'axios';
 import './App.css';
 
 const DynamicTableComponent = ({ table }) => {
@@ -16,11 +17,19 @@ const DynamicTableComponent = ({ table }) => {
 };
 
 function App() {
+  const [tables, setTables] = useState([]);
+
+  useEffect(() => {
+    axios.get('http://localhost:5000/tables')
+      .then(response => setTables(response.data))
+      .catch(error => console.error(error));
+  }, []);
+
   return (
     <Router>
       <Navbar />
       <main>
-        <Sidebar />
+        <Sidebar tables={tables} />
         <section>
           <Routes>
             <Route path="/dashboard" element={<Dashboard />} />
@@ -29,7 +38,7 @@ function App() {
             <Route path="/customers/new" element={<CustomerForm />} />
             <Route path="/customers/:id" element={<CustomerDetails />} />
             <Route path="/deletecustomers/:id" element={<DeleteCustomerDetails />} />
-            {['clientes', 'productos'].map(table => (
+            {tables.map(table => (
               <Route
                 key={table}
                 path={`/${table}`}

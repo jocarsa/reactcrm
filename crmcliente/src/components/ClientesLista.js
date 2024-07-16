@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import './ClientesLista.css'
+import './ClientesLista.css';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import CustomerFormModal from './CustomerFormModal'; // Import the modal component
@@ -26,6 +26,34 @@ const ClientesLista = () => {
   };
   const closeUpdateModal = () => setUpdateModalIsOpen(false);
 
+  const renderTableHeaders = () => {
+    if (customers.length === 0) return null;
+    const headers = Object.keys(customers[0]).filter(key => key !== 'id');
+    return (
+      <tr>
+        {headers.map(header => (
+          <th key={header}>{header.charAt(0).toUpperCase() + header.slice(1)}</th>
+        ))}
+        <th className="operaciones">Operaciones</th>
+      </tr>
+    );
+  };
+
+  const renderTableRows = () => {
+    return customers.map(customer => (
+      <tr key={customer.id}>
+        {Object.keys(customer).filter(key => key !== 'id').map(key => (
+          <td key={key}>{customer[key]}</td>
+        ))}
+        <td>
+          <Link to={`/customers/${customer.id}`}>Ver cliente</Link>
+          <Link to={`/deletecustomers/${customer.id}`}>Eliminar cliente</Link>
+          <button onClick={() => openUpdateModal(customer)}>Modificar cliente</button>
+        </td>
+      </tr>
+    ));
+  };
+
   return (
     <div>
       <div>
@@ -34,26 +62,10 @@ const ClientesLista = () => {
       </div>
       <table>
         <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Email</th>
-            <th>Telefono</th>
-            <th className="operaciones">Operaciones</th>
-          </tr>
+          {renderTableHeaders()}
         </thead>
         <tbody>
-          {customers.map(customer => (
-            <tr key={customer.id}>
-              <td>{customer.nombre}</td>
-              <td>{customer.email}</td>
-              <td>{customer.telefono}</td>
-              <td>
-                <Link to={`/customers/${customer.id}`}>Ver cliente</Link>
-                <Link to={`/deletecustomers/${customer.id}`}>Eliminar cliente</Link>
-                <Link onClick={() => openUpdateModal(customer)}>Modificar cliente</Link>
-              </td>
-            </tr>
-          ))}
+          {renderTableRows()}
         </tbody>
       </table>
       <UpdateCustomerFormModal isOpen={updateModalIsOpen} onRequestClose={closeUpdateModal} customer={selectedCustomer} />
