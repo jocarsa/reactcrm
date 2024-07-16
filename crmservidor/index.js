@@ -91,6 +91,19 @@ app.post('/clientes', (req, res) => {
   });
 });
 
+// Update a customer by id
+app.put('/clientes/:id', (req, res) => {
+  const { id } = req.params;
+  const { nombre, email, telefono } = req.body;
+  const query = 'UPDATE clientes SET nombre = ?, email = ?, telefono = ? WHERE Identificador = ?';
+  db.query(query, [nombre, email, telefono, id], (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    res.json({ message: 'Customer updated successfully' });
+  });
+});
+
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

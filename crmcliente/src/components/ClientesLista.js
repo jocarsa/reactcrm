@@ -2,10 +2,13 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import CustomerFormModal from './CustomerFormModal'; // Import the modal component
+import UpdateCustomerFormModal from './UpdateCustomerFormModal'; // Import the update modal component
 
 const ClientesLista = () => {
   const [customers, setCustomers] = useState([]);
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [updateModalIsOpen, setUpdateModalIsOpen] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
 
   useEffect(() => {
     axios.get('http://localhost:5000/clientes')
@@ -15,6 +18,12 @@ const ClientesLista = () => {
 
   const openModal = () => setModalIsOpen(true);
   const closeModal = () => setModalIsOpen(false);
+
+  const openUpdateModal = (customer) => {
+    setSelectedCustomer(customer);
+    setUpdateModalIsOpen(true);
+  };
+  const closeUpdateModal = () => setUpdateModalIsOpen(false);
 
   return (
     <div>
@@ -40,11 +49,13 @@ const ClientesLista = () => {
               <td>
                 <Link to={`/customers/${customer.id}`}>Ver cliente</Link>
                 <Link to={`/deletecustomers/${customer.id}`}>Eliminar cliente</Link>
+                <button onClick={() => openUpdateModal(customer)}>Modificar cliente</button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+      <UpdateCustomerFormModal isOpen={updateModalIsOpen} onRequestClose={closeUpdateModal} customer={selectedCustomer} />
     </div>
   );
 };
