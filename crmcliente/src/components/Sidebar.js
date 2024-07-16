@@ -4,14 +4,8 @@ import { Link } from 'react-router-dom';
 const Sidebar = () => {
   return (
     <nav>
-      <ul>
-        <li>
-          <Link to="/dashboard">Escritorio</Link>
-        </li>
-        <li>
-          <Link to="/clientes">Clientes</Link>
-        </li>
-      </ul>
+        <Link to="/dashboard">Escritorio</Link>
+        <Link to="/clientes">Clientes</Link>
     </nav>
   );
 };

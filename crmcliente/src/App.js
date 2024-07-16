@@ -6,13 +6,14 @@ import Dashboard from './components/Dashboard';
 import CustomerList from './components/ClientesLista';
 import CustomerDetails from './components/ClientesDetalle';
 import CustomerForm from './components/ClientesFormulario';
-
+import './App.css';
 
 
 function App() {
   return (
     <Router>
       <Navbar />
+      <main>
       <Sidebar />
       <section>
         <Routes>
@@ -22,6 +23,7 @@ function App() {
           <Route path="/customers/:id" element={<CustomerDetails />} />
         </Routes>
       </section>
+      </main>
     </Router>
   );
 }

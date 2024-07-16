@@ -12,13 +12,29 @@ const ClientesLista = () => {
   }, []);
 
   return (
-    <ul>
-      {customers.map(customer => (
-        <li key={customer.id}>
-          <Link to={`/customers/${customer.id}`}>{customer.nombre} - {customer.email}</Link>
-        </li>
+    <table>
+      <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Telefono</th>
+                <th>Operaciones</th>
+          </tr>
+      </thead>
+      <tbody>
+        {customers.map(customer => (
+        <tr key={customer.id}>
+            <td>{customer.nombre}</td>
+            <td>{customer.email}</td>
+            <td>{customer.telefono}</td>
+      <td>
+          <Link to={`/customers/${customer.id}`}> Ver cliente </Link>
+        </td>
+        </tr>
       ))}
-    </ul>
+      </tbody>
+      </table>
+    
   );
 };
 
