@@ -6,8 +6,14 @@ import Dashboard from './components/Dashboard';
 import CustomerList from './components/ClientesLista';
 import ProductosLista from './components/ProductosLista';
 import CustomerDetails from './components/ClientesDetalle';
+import CustomerForm from './components/ClientesFormulario';
 import DeleteCustomerDetails from './components/DeleteCustomerDetails';
 import './App.css';
+
+const DynamicTableComponent = ({ table }) => {
+  // Placeholder for actual table component
+  return <div>{table} data</div>;
+};
 
 function App() {
   return (
@@ -20,8 +26,16 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/clientes" element={<CustomerList />} />
             <Route path="/productos" element={<ProductosLista />} />
+            <Route path="/customers/new" element={<CustomerForm />} />
             <Route path="/customers/:id" element={<CustomerDetails />} />
             <Route path="/deletecustomers/:id" element={<DeleteCustomerDetails />} />
+            {['clientes', 'productos'].map(table => (
+              <Route
+                key={table}
+                path={`/${table}`}
+                element={<DynamicTableComponent table={table} />}
+              />
+            ))}
           </Routes>
         </section>
       </main>

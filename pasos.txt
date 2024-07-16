@@ -38,3 +38,5 @@ INSERT INTO `productos` (`Identificador`, `nombre`, `descripcion`, `precio`) VAL
 INSERT INTO `clientes` (`Identificador`, `nombre`, `email`, `telefono`) VALUES (NULL, 'Juan Perez', 'juan@perez.com', '52345345');
 
 npm install react-modal
+
+CREATE TABLE `crm`.`pedidos` (`Identificador` INT(255) NOT NULL AUTO_INCREMENT , `fecha` VARCHAR(255) NOT NULL , `numeropedido` VARCHAR(255) NOT NULL , `cliente` VARCHAR(255) NOT NULL , `producto` VARCHAR(255) NOT NULL , PRIMARY KEY (`Identificador`)) ENGINE = InnoDB;

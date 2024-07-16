@@ -104,6 +104,18 @@ app.put('/clientes/:id', (req, res) => {
   });
 });
 
+// Get all table names
+app.get('/tables', (req, res) => {
+  const query = 'SHOW TABLES';
+  db.query(query, (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    const tables = results.map(row => Object.values(row)[0]);
+    res.json(tables);
+  });
+});
+
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
