@@ -6,3 +6,6 @@ cd crmcliente
 
 Instalar modulos
 npm install axios react-router @mui/material @emotion/react @emotion/styled
+npm install react-router-dom
+Arrancar servidor
+npm start
