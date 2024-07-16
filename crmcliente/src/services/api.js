@@ -5,5 +5,6 @@ const api = axios.create({
 });
 
 export const getCustomers = () => api.get('/clientes');
+export const getProductos = () => api.get('/productos');
 
 export default api;

@@ -29,3 +29,11 @@ npm install express
 npm mysql2 sequelize
 
 npm install cors
+
+
+CREATE TABLE `crm`.`productos` (`Identificador` INT(255) NOT NULL AUTO_INCREMENT , `nombre` VARCHAR(255) NOT NULL , `descripcion` VARCHAR(255) NOT NULL , `precio` VARCHAR(255) NOT NULL , PRIMARY KEY (`Identificador`)) ENGINE = InnoDB;
+
+INSERT INTO `productos` (`Identificador`, `nombre`, `descripcion`, `precio`) VALUES (NULL, 'Producto de prueba', 'Esta es la descripción del producto de prueba', '20');
+
+INSERT INTO `clientes` (`Identificador`, `nombre`, `email`, `telefono`) VALUES (NULL, 'Juan Perez', 'juan@perez.com', '52345345');
+

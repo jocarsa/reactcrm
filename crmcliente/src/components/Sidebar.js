@@ -6,6 +6,7 @@ const Sidebar = () => {
     <nav>
         <Link to="/dashboard">Escritorio</Link>
         <Link to="/clientes">Clientes</Link>
+        <Link to="/productos">Productos</Link>
     </nav>
   );
 };

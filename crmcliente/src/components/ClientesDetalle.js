@@ -4,21 +4,25 @@ import axios from 'axios';
 
 const ClientesDetalle = () => {
   const { id } = useParams();
-  const [customer, setCustomer] = useState(null);
+  const [cliente, setCliente] = useState(null);
 
   useEffect(() => {
-    axios.get(`/api/customers/${id}`)
-      .then(response => setCustomer(response.data))
+    axios.get(`http://localhost:5000/clientes/${id}`)
+      .then(function(response){
+        console.log(response.data)
+        setCliente(response.data[0])
+        console.log(cliente)
+    } )
       .catch(error => console.error(error));
   }, [id]);
 
-  if (!customer) return <div>Loading...</div>;
+  if (!cliente) return <div>Cargando...</div>;
 
   return (
     <div>
-      <h1>{customer.name}</h1>
-      <p>Email: {customer.email}</p>
-      <p>Phone: {customer.phone}</p>
+      <h1>{cliente.nombre}</h1>
+      <p>Email: {cliente.email}</p>
+      <p>Telefono: {cliente.telefono}</p>
       {/* Add more customer details here */}
     </div>
   );

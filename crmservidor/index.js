@@ -44,6 +44,29 @@ app.get('/clientes', (req, res) => {
   });
 });
 
+// Get a specific customer by id
+app.get('/clientes/:id', (req, res) => {
+  const { id } = req.params;
+  const query = 'SELECT Identificador AS id, nombre, email, telefono FROM clientes WHERE Identificador = ?';
+  db.query(query, [id], (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    res.json(results);
+  });
+});
+
+// Tomar todos los productos
+app.get('/productos', (req, res) => {
+  const query = 'SELECT Identificador AS id, nombre, descripcion, precio FROM productos';
+  db.query(query, (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    res.json(results);
+  });
+});
+
 
 
 // Start the server
