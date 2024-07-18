@@ -1,4 +1,3 @@
-// components/EntityList.js
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getAll, remove } from '../services/apiService';
@@ -15,8 +14,12 @@ const EntityList = ({ entity }) => {
   }, [entity]);
 
   const fetchRecords = async () => {
-    const data = await getAll(entity);
-    setRecords(data);
+    try {
+      const data = await getAll(entity);
+      setRecords(data);
+    } catch (error) {
+      console.error('Error fetching records:', error);
+    }
   };
 
   const openModal = () => setModalIsOpen(true);

@@ -1,69 +1,54 @@
 // components/EntityFormModal.js
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
-import { create, update, getSchema, getForeignKeys } from '../services/apiService';
-import { mapMySQLTypeToHTMLInputType } from '../utils/fieldTypeMapper';
-import axios from 'axios';
+import { create, update, getSchema, getForeignKeys, getRelatedData } from '../services/apiService';
 
 Modal.setAppElement('#root'); // Set the root element for accessibility
 
 const EntityFormModal = ({ entity, isOpen, onRequestClose, onFormSubmit, record }) => {
   const [formData, setFormData] = useState({});
   const [schema, setSchema] = useState({});
-  const [foreignKeyData, setForeignKeyData] = useState({});
+  const [foreignKeys, setForeignKeys] = useState([]);
+  const [relatedData, setRelatedData] = useState({});
 
   useEffect(() => {
     const fetchSchema = async () => {
       try {
-        const data = await getSchema(entity);
-        setSchema(data);
-        if (!record) {
-          const initialFormData = {};
-          Object.keys(data).forEach(key => {
-            initialFormData[key] = '';
-          });
-          setFormData(initialFormData);
-        }
+        const schemaData = await getSchema(entity);
+        setSchema(schemaData);
+
+        const foreignKeysData = await getForeignKeys(entity);
+        setForeignKeys(foreignKeysData);
+
+        const relatedDataPromises = foreignKeysData.map(fk =>
+          getRelatedData(entity, fk.COLUMN_NAME)
+        );
+        const relatedDataResults = await Promise.all(relatedDataPromises);
+        const relatedDataMap = relatedDataResults.reduce((acc, data, idx) => {
+          acc[foreignKeysData[idx].COLUMN_NAME] = data;
+          return acc;
+        }, {});
+        setRelatedData(relatedDataMap);
       } catch (error) {
         console.error('Error fetching schema:', error);
       }
     };
 
-    fetchSchema();
-  }, [entity]);
-
-  useEffect(() => {
-    if (record) {
-      setFormData(record);
-    } else {
-      const initialFormData = {};
-      Object.keys(schema).forEach(key => {
-        initialFormData[key] = '';
-      });
-      setFormData(initialFormData);
+    if (isOpen) {
+      fetchSchema();
+      if (record) {
+        setFormData(record);
+      } else {
+        setFormData({});
+      }
     }
-  }, [record, schema]);
-
-  useEffect(() => {
-    const fetchForeignKeyData = async () => {
-      const foreignKeys = await getForeignKeys(entity);
-      const foreignKeyPromises = foreignKeys.map(async fk => {
-        const response = await axios.get(`http://localhost:5000/related/${entity}/${fk.COLUMN_NAME}`);
-        return { [fk.COLUMN_NAME]: response.data };
-      });
-      const foreignKeyDataArray = await Promise.all(foreignKeyPromises);
-      const foreignKeyData = Object.assign({}, ...foreignKeyDataArray);
-      setForeignKeyData(foreignKeyData);
-    };
-
-    fetchForeignKeyData();
-  }, [entity, schema]);
+  }, [entity, isOpen, record]);
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: value
     });
   };
 
@@ -78,8 +63,6 @@ const EntityFormModal = ({ entity, isOpen, onRequestClose, onFormSubmit, record 
     onRequestClose();
   };
 
-  const isForeignKey = (key) => Object.keys(foreignKeyData).includes(key);
-
   return (
     <Modal isOpen={isOpen} onRequestClose={onRequestClose}>
       <h2>{record ? 'Update' : 'Create'} {entity}</h2>
@@ -87,21 +70,18 @@ const EntityFormModal = ({ entity, isOpen, onRequestClose, onFormSubmit, record 
         {Object.keys(schema).map(key => (
           <div key={key}>
             <label>{key.charAt(0).toUpperCase() + key.slice(1)}:</label>
-            {isForeignKey(key) ? (
+            {foreignKeys.some(fk => fk.COLUMN_NAME === key) ? (
               <select
                 name={key}
                 value={formData[key] || ''}
                 onChange={handleChange}
                 required
               >
-                <option value="">Select...</option>
-                {foreignKeyData[key].map(option => (
-                  <option key={option.id} value={option.id}>
-                    {option.nombre}
-                  </option>
+                {relatedData[key]?.map(option => (
+                  <option key={option.id} value={option.id}>{option.nombre}</option>
                 ))}
               </select>
-            ) : mapMySQLTypeToHTMLInputType(schema[key]) === 'textarea' ? (
+            ) : schema[key] === 'text' ? (
               <textarea
                 name={key}
                 value={formData[key] || ''}
@@ -110,7 +90,7 @@ const EntityFormModal = ({ entity, isOpen, onRequestClose, onFormSubmit, record 
               />
             ) : (
               <input
-                type={mapMySQLTypeToHTMLInputType(schema[key])}
+                type={schema[key] === 'date' ? 'date' : 'text'}
                 name={key}
                 value={formData[key] || ''}
                 onChange={handleChange}
