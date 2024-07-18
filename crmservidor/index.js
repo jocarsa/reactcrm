@@ -65,17 +65,33 @@ const getTableColumns = (table) => {
   });
 };
 
-// Route to get all table names
-app.get('/tables', (req, res) => {
-  const query = 'SHOW TABLES';
-  db.query(query, (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    const tables = results.map(row => Object.values(row)[0]);
-    res.json(tables);
-  });
+// Route to get all table names with categories
+app.get('/tables', async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+        TABLE_NAME, 
+        TABLE_COMMENT 
+      FROM 
+        INFORMATION_SCHEMA.TABLES 
+      WHERE 
+        TABLE_SCHEMA = 'crm'
+    `;
+    db.query(query, (err, results) => {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+      const tables = results.map(row => ({
+        name: row.TABLE_NAME,
+        category: row.TABLE_COMMENT ? JSON.parse(row.TABLE_COMMENT).categoria : 'Uncategorized'
+      }));
+      res.json(tables);
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
+
 
 // Generic route to get all records from any table with joins on foreign keys
 app.get('/:entity', async (req, res) => {

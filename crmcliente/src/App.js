@@ -27,10 +27,10 @@ const App = () => {
           <Routes>
             <Route path="/dashboard" element={<Dashboard />} />
             {tables.map(table => (
-              <Route key={table} path={`/${table}`} element={<EntityList entity={table} />} />
+              <Route key={table.name} path={`/${table.name}`} element={<EntityList entity={table.name} />} />
             ))}
             {tables.map(table => (
-              <Route key={table} path={`/${table}/:id`} element={<EntityDetail entity={table} />} />
+              <Route key={table.name} path={`/${table.name}/:id`} element={<EntityDetail entity={table.name} />} />
             ))}
           </Routes>
         </section>
