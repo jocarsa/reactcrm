@@ -52,7 +52,7 @@ const EntityList = ({ entity }) => {
         {Object.keys(record).filter(key => key !== 'id').map(key => (
           <td key={key}>{record[key]}</td>
         ))}
-        <td>
+        <td key={`operations-${record.id}`}>
           <Link to={`/${entity}/${record.id}`}>View</Link>
           <button onClick={() => openUpdateModal(record)}>Edit</button>
           <button onClick={() => handleDelete(record.id)}>Delete</button>

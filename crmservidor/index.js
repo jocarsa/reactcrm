@@ -28,6 +28,43 @@ db.connect((err) => {
   console.log('Connected to the database.');
 });
 
+// Helper function to get foreign key constraints
+const getForeignKeys = (table) => {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT
+        TABLE_NAME,
+        COLUMN_NAME,
+        REFERENCED_TABLE_NAME,
+        REFERENCED_COLUMN_NAME
+      FROM
+        INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+      WHERE
+        REFERENCED_TABLE_NAME IS NOT NULL
+        AND TABLE_NAME = ?
+    `;
+    db.query(query, [table], (err, results) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve(results);
+    });
+  });
+};
+
+// Helper function to get table columns
+const getTableColumns = (table) => {
+  return new Promise((resolve, reject) => {
+    const query = `SHOW COLUMNS FROM ??`;
+    db.query(query, [table], (err, results) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve(results.map(row => row.Field));
+    });
+  });
+};
+
 // Route to get all table names
 app.get('/tables', (req, res) => {
   const query = 'SHOW TABLES';
@@ -40,16 +77,44 @@ app.get('/tables', (req, res) => {
   });
 });
 
-// Generic route to get all records from any table
-app.get('/:entity', (req, res) => {
+// Generic route to get all records from any table with joins on foreign keys
+app.get('/:entity', async (req, res) => {
   const { entity } = req.params;
-  const query = `SELECT * FROM ??`;
-  db.query(query, [entity], (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    res.json(results);
-  });
+  
+  try {
+    // Get foreign keys and columns for the entity
+    const [foreignKeys, columns] = await Promise.all([
+      getForeignKeys(entity),
+      getTableColumns(entity)
+    ]);
+    
+    // Construct the SELECT clause
+    let selectClause = columns
+      .filter(column => !foreignKeys.some(fk => fk.COLUMN_NAME === column))
+      .map(column => `${entity}.${column}`)
+      .join(', ');
+    
+    const joinClauses = [];
+    
+    foreignKeys.forEach(fk => {
+      selectClause += `, ${fk.REFERENCED_TABLE_NAME}.nombre AS ${fk.TABLE_NAME}_${fk.COLUMN_NAME}`;
+      joinClauses.push(`LEFT JOIN ${fk.REFERENCED_TABLE_NAME} ON ${entity}.${fk.COLUMN_NAME} = ${fk.REFERENCED_TABLE_NAME}.${fk.REFERENCED_COLUMN_NAME}`);
+    });
+    
+    // Construct the full SQL query
+    const query = `SELECT ${selectClause} FROM ${entity} ${joinClauses.join(' ')}`;
+    
+    // Execute the query
+    db.query(query, (err, results) => {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+      res.json(results);
+    });
+    
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Generic route to get a specific record by id from any table
@@ -93,7 +158,7 @@ app.post('/:entity', (req, res) => {
 app.put('/:entity/:id', (req, res) => {
   const { entity, id } = req.params;
   const data = req.body;
-  const query = `UPDATE ${entity} SET ${data} WHERE id = ${id}`;
+  const query = `UPDATE ?? SET ? WHERE id = ?`;
   db.query(query, [entity, data, id], (err, results) => {
     if (err) {
       return res.status(500).json({ error: err.message });

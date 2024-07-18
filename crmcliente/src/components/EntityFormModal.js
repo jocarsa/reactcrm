@@ -1,10 +1,16 @@
 // components/EntityFormModal.js
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
-import axios from 'axios';
 import { create, update } from '../services/apiService';
 
 Modal.setAppElement('#root'); // Set the root element for accessibility
+
+const sampleSchema = {
+  nombre: '',
+  email: '',
+  telefono: ''
+  // Add other fields as necessary
+};
 
 const EntityFormModal = ({ entity, isOpen, onRequestClose, onFormSubmit, record }) => {
   const [formData, setFormData] = useState({});
@@ -13,7 +19,7 @@ const EntityFormModal = ({ entity, isOpen, onRequestClose, onFormSubmit, record 
     if (record) {
       setFormData(record);
     } else {
-      setFormData({});
+      setFormData(sampleSchema); // Initialize with sample schema
     }
   }, [record]);
 
