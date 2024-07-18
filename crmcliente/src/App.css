@@ -49,11 +49,26 @@ nav a{
 
 table{
     width:100%;
+    border:1px solid rgba(0,0,0,0.2);
 }
 table thead{
     background:indigo;
     color:white;
 }
+table tr{
+    border-bottom:1px solid rgba(0,0,0,0.2);
+}
+table tr:nth-child(odd){
+    background:rgba(0,0,0,0.03);
+}
 ul{
     list-style-type:none;
+}
+.detalles .clave{
+    width:20%;
+    background:indigo;
+    color:white;
+}
+.detalles .valor{
+    width:80%;
 }

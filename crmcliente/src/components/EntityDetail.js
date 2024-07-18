@@ -29,13 +29,16 @@ const EntityDetail = ({ entity }) => {
   return (
     <div>
       <h1>Details of {entity.charAt(0).toUpperCase() + entity.slice(1)}</h1>
-      <ul>
-        {Object.entries(record).map(([key, value]) => (
-          <li key={key}>
-            <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value}
-          </li>
-        ))}
-      </ul>
+      <table className="detalles">
+        <tbody>
+          {Object.entries(record).map(([key, value]) => (
+            <tr key={key}>
+              <td className="clave"><strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong></td>
+              <td className="valor">{value}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };

@@ -94,6 +94,7 @@ app.get('/schema/:entity', authenticateToken, async (req, res) => {
     const schema = await getTableSchema(entity);
     res.json(schema);
   } catch (error) {
+    console.error('Error fetching schema:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -167,20 +168,7 @@ app.get('/related/:entity/:foreignKey', authenticateToken, async (req, res) => {
   });
 });
 
-// Helper function to get table columns
-const getTableColumns = (table) => {
-  return new Promise((resolve, reject) => {
-    const query = `SHOW COLUMNS FROM ??`;
-    db.query(query, [table], (err, results) => {
-      if (err) {
-        return reject(err);
-      }
-      resolve(results.map(row => row.Field));
-    });
-  });
-};
-
-// Route to get all table names with categories (protected)
+// Route to get all table names with categories
 app.get('/tables', authenticateToken, async (req, res) => {
   try {
     const query = `
@@ -194,6 +182,7 @@ app.get('/tables', authenticateToken, async (req, res) => {
     `;
     db.query(query, (err, results) => {
       if (err) {
+        console.error('Error fetching tables:', err);
         return res.status(500).json({ error: err.message });
       }
       const tables = results.map(row => ({
@@ -203,9 +192,24 @@ app.get('/tables', authenticateToken, async (req, res) => {
       res.json(tables);
     });
   } catch (error) {
+    console.error('Error in /tables route:', error);
     res.status(500).json({ error: error.message });
   }
 });
+
+// Helper function to get table columns
+const getTableColumns = (table) => {
+  return new Promise((resolve, reject) => {
+    const query = `SHOW COLUMNS FROM ??`;
+    db.query(query, [table], (err, results) => {
+      if (err) {
+        console.error('Error fetching table columns:', err);
+        return reject(err);
+      }
+      resolve(results.map(row => row.Field));
+    });
+  });
+};
 
 // Generic route to get all records from any table with joins on foreign keys
 app.get('/:entity', authenticateToken, async (req, res) => {
@@ -237,12 +241,14 @@ app.get('/:entity', authenticateToken, async (req, res) => {
     // Execute the query
     db.query(query, (err, results) => {
       if (err) {
+        console.error('Error executing query:', err);
         return res.status(500).json({ error: err.message });
       }
       res.json(results);
     });
 
   } catch (error) {
+    console.error('Error fetching records:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -277,12 +283,14 @@ app.get('/:entity/:id', authenticateToken, async (req, res) => {
     // Execute the query
     db.query(query, [id], (err, results) => {
       if (err) {
+        console.error('Error executing query:', err);
         return res.status(500).json({ error: err.message });
       }
       res.json(results);
     });
 
   } catch (error) {
+    console.error('Error fetching record:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -293,6 +301,7 @@ app.delete('/:entity/:id', authenticateToken, (req, res) => {
   const query = `DELETE FROM ?? WHERE id = ?`;
   db.query(query, [entity, id], (err, results) => {
     if (err) {
+      console.error('Error deleting record:', err);
       return res.status(500).json({ error: err.message });
     }
     res.json({ message: 'Record deleted successfully' });
@@ -303,9 +312,13 @@ app.delete('/:entity/:id', authenticateToken, (req, res) => {
 app.post('/:entity', authenticateToken, (req, res) => {
   const { entity } = req.params;
   const data = req.body;
+  delete data.id; // Remove the id from the data before insertion
+  console.log('Inserting data into', entity, ':', data);
   const query = `INSERT INTO ?? SET ?`;
+    console.log(query);
   db.query(query, [entity, data], (err, results) => {
     if (err) {
+      console.error('Database insert error:', err);
       return res.status(500).json({ error: err.message });
     }
     res.json({ message: 'Record added successfully', id: results.insertId });
@@ -316,9 +329,11 @@ app.post('/:entity', authenticateToken, (req, res) => {
 app.put('/:entity/:id', authenticateToken, (req, res) => {
   const { entity, id } = req.params;
   const data = req.body;
+  delete data.id; // Remove the id from the data before updating
   const query = `UPDATE ?? SET ? WHERE id = ?`;
   db.query(query, [entity, data, id], (err, results) => {
     if (err) {
+      console.error('Error updating record:', err);
       return res.status(500).json({ error: err.message });
     }
     res.json({ message: 'Record updated successfully' });

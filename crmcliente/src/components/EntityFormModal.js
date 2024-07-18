@@ -1,4 +1,3 @@
-// components/EntityFormModal.js
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
 import { create, update, getSchema, getForeignKeys, getRelatedData } from '../services/apiService';
@@ -54,20 +53,27 @@ const EntityFormModal = ({ entity, isOpen, onRequestClose, onFormSubmit, record 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (record) {
-      await update(entity, record.id, formData);
-    } else {
-      await create(entity, formData);
+    try {
+      const dataToSubmit = { ...formData };
+      delete dataToSubmit.id; // Remove the id from the data before submission
+      console.log('Submitting data:', dataToSubmit);
+      if (record) {
+        await update(entity, record.id, dataToSubmit);
+      } else {
+        await create(entity, dataToSubmit);
+      }
+      onFormSubmit();
+      onRequestClose();
+    } catch (error) {
+      console.error('Error submitting form:', error);
     }
-    onFormSubmit();
-    onRequestClose();
   };
 
   return (
     <Modal isOpen={isOpen} onRequestClose={onRequestClose}>
       <h2>{record ? 'Update' : 'Create'} {entity}</h2>
       <form onSubmit={handleSubmit}>
-        {Object.keys(schema).map(key => (
+        {Object.keys(schema).filter(key => key !== 'id').map(key => (
           <div key={key}>
             <label>{key.charAt(0).toUpperCase() + key.slice(1)}:</label>
             {foreignKeys.some(fk => fk.COLUMN_NAME === key) ? (
@@ -76,7 +82,7 @@ const EntityFormModal = ({ entity, isOpen, onRequestClose, onFormSubmit, record 
                 value={formData[key] || ''}
                 onChange={handleChange}
                 required
-              >
+              ><option>Selecciona</option>
                 {relatedData[key]?.map(option => (
                   <option key={option.id} value={option.id}>{option.nombre}</option>
                 ))}
