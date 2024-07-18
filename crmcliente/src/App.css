@@ -72,3 +72,7 @@ ul{
 .detalles .valor{
     width:80%;
 }
+input,select{
+    padding:10px 0px;
+    width:100%;
+}

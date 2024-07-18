@@ -1,0 +1,31 @@
+.btn {
+  padding: 8px 16px;
+  margin: 4px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  color: white;
+    font-size:10px;
+}
+
+.btn-view {
+  background-color: #007bff; /* Blue */
+}
+
+.btn-edit {
+  background-color: #ffc107; /* Yellow */
+}
+
+.btn-delete {
+  background-color: #dc3545; /* Red */
+}
+
+.btn-create {
+  background-color: #28a745; /* Green */
+  margin-bottom: 16px;
+}
+
+.btn:hover {
+  opacity: 0.8;
+}

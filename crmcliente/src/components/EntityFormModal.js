@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
 import { create, update, getSchema, getForeignKeys, getRelatedData } from '../services/apiService';
+import './EntityFormModal.css';
 
 Modal.setAppElement('#root'); // Set the root element for accessibility
 
@@ -73,40 +74,47 @@ const EntityFormModal = ({ entity, isOpen, onRequestClose, onFormSubmit, record 
     <Modal isOpen={isOpen} onRequestClose={onRequestClose}>
       <h2>{record ? 'Update' : 'Create'} {entity}</h2>
       <form onSubmit={handleSubmit}>
-        {Object.keys(schema).filter(key => key !== 'id').map(key => (
-          <div key={key}>
-            <label>{key.charAt(0).toUpperCase() + key.slice(1)}:</label>
-            {foreignKeys.some(fk => fk.COLUMN_NAME === key) ? (
-              <select
-                name={key}
-                value={formData[key] || ''}
-                onChange={handleChange}
-                required
-              ><option>Selecciona</option>
-                {relatedData[key]?.map(option => (
-                  <option key={option.id} value={option.id}>{option.nombre}</option>
-                ))}
-              </select>
-            ) : schema[key] === 'text' ? (
-              <textarea
-                name={key}
-                value={formData[key] || ''}
-                onChange={handleChange}
-                required
-              />
-            ) : (
-              <input
-                type={schema[key] === 'date' ? 'date' : 'text'}
-                name={key}
-                value={formData[key] || ''}
-                onChange={handleChange}
-                required
-              />
-            )}
-          </div>
-        ))}
-        <button type="submit">{record ? 'Update' : 'Create'}</button>
-        <button type="button" onClick={onRequestClose}>Close</button>
+        <table>
+          <tbody>
+            {Object.keys(schema).filter(key => key !== 'id').map(key => (
+              <tr key={key}>
+                <th><label>{key.charAt(0).toUpperCase() + key.slice(1)}:</label></th>
+                <td>
+                  {foreignKeys.some(fk => fk.COLUMN_NAME === key) ? (
+                    <select
+                      name={key}
+                      value={formData[key] || ''}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="">Select {key.charAt(0).toUpperCase() + key.slice(1)}</option>
+                      {relatedData[key]?.map(option => (
+                        <option key={option.id} value={option.id}>{option.nombre}</option>
+                      ))}
+                    </select>
+                  ) : schema[key] === 'text' ? (
+                    <textarea
+                      name={key}
+                      value={formData[key] || ''}
+                      onChange={handleChange}
+                      required
+                    />
+                  ) : (
+                    <input
+                      type={schema[key] === 'date' ? 'date' : 'text'}
+                      name={key}
+                      value={formData[key] || ''}
+                      onChange={handleChange}
+                      required
+                    />
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <button className="btn btn-create" type="submit">{record ? 'Update' : 'Create'}</button>
+        <button  className="btn btn-delete" type="button" onClick={onRequestClose}>Close</button>
       </form>
     </Modal>
   );
