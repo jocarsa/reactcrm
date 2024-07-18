@@ -5,7 +5,7 @@ const cors = require('cors');
 
 // Create an instance of Express
 const app = express();
-const PORT = process.env.PORT || 5000;  // Change the port to 5000
+const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 
@@ -26,6 +26,38 @@ db.connect((err) => {
     return;
   }
   console.log('Connected to the database.');
+});
+
+// Helper function to get table schema dynamically
+const getTableSchema = (table) => {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT COLUMN_NAME, DATA_TYPE
+      FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_SCHEMA = 'crm' AND TABLE_NAME = ?
+    `;
+    db.query(query, [table], (err, results) => {
+      if (err) {
+        return reject(err);
+      }
+      const schema = {};
+      results.forEach(row => {
+        schema[row.COLUMN_NAME] = row.DATA_TYPE;
+      });
+      resolve(schema);
+    });
+  });
+};
+
+// Route to get schema for an entity
+app.get('/schema/:entity', async (req, res) => {
+  const { entity } = req.params;
+  try {
+    const schema = await getTableSchema(entity);
+    res.json(schema);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Helper function to get foreign key constraints
@@ -92,34 +124,33 @@ app.get('/tables', async (req, res) => {
   }
 });
 
-
 // Generic route to get all records from any table with joins on foreign keys
 app.get('/:entity', async (req, res) => {
   const { entity } = req.params;
-  
+
   try {
     // Get foreign keys and columns for the entity
     const [foreignKeys, columns] = await Promise.all([
       getForeignKeys(entity),
       getTableColumns(entity)
     ]);
-    
+
     // Construct the SELECT clause
     let selectClause = columns
       .filter(column => !foreignKeys.some(fk => fk.COLUMN_NAME === column))
       .map(column => `${entity}.${column}`)
       .join(', ');
-    
+
     const joinClauses = [];
-    
+
     foreignKeys.forEach(fk => {
       selectClause += `, ${fk.REFERENCED_TABLE_NAME}.nombre AS ${fk.TABLE_NAME}_${fk.COLUMN_NAME}`;
       joinClauses.push(`LEFT JOIN ${fk.REFERENCED_TABLE_NAME} ON ${entity}.${fk.COLUMN_NAME} = ${fk.REFERENCED_TABLE_NAME}.${fk.REFERENCED_COLUMN_NAME}`);
     });
-    
+
     // Construct the full SQL query
     const query = `SELECT ${selectClause} FROM ${entity} ${joinClauses.join(' ')}`;
-    
+
     // Execute the query
     db.query(query, (err, results) => {
       if (err) {
@@ -127,22 +158,50 @@ app.get('/:entity', async (req, res) => {
       }
       res.json(results);
     });
-    
+
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// Generic route to get a specific record by id from any table
-app.get('/:entity/:id', (req, res) => {
+// Generic route to get a specific record by id from any table with joins on foreign keys
+app.get('/:entity/:id', async (req, res) => {
   const { entity, id } = req.params;
-  const query = `SELECT * FROM ?? WHERE id = ?`;
-  db.query(query, [entity, id], (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    res.json(results);
-  });
+
+  try {
+    // Get foreign keys and columns for the entity
+    const [foreignKeys, columns] = await Promise.all([
+      getForeignKeys(entity),
+      getTableColumns(entity)
+    ]);
+
+    // Construct the SELECT clause
+    let selectClause = columns
+      .filter(column => !foreignKeys.some(fk => fk.COLUMN_NAME === column))
+      .map(column => `${entity}.${column}`)
+      .join(', ');
+
+    const joinClauses = [];
+
+    foreignKeys.forEach(fk => {
+      selectClause += `, ${fk.REFERENCED_TABLE_NAME}.nombre AS ${fk.TABLE_NAME}_${fk.COLUMN_NAME}`;
+      joinClauses.push(`LEFT JOIN ${fk.REFERENCED_TABLE_NAME} ON ${entity}.${fk.COLUMN_NAME} = ${fk.REFERENCED_TABLE_NAME}.${fk.REFERENCED_COLUMN_NAME}`);
+    });
+
+    // Construct the full SQL query
+    const query = `SELECT ${selectClause} FROM ${entity} ${joinClauses.join(' ')} WHERE ${entity}.id = ?`;
+
+    // Execute the query
+    db.query(query, [id], (err, results) => {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+      res.json(results);
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Generic route to delete a specific record by id from any table
