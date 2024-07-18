@@ -2,14 +2,14 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mysql = require('mysql2');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 
 // Create an instance of Express
 const app = express();
 const PORT = process.env.PORT || 5000;
+const SECRET_KEY = 'your_secret_key'; // Change this to your actual secret key
 
 app.use(cors());
-
-// Middleware
 app.use(bodyParser.json());
 
 // Database connection
@@ -26,6 +26,42 @@ db.connect((err) => {
     return;
   }
   console.log('Connected to the database.');
+});
+
+// Middleware to protect routes
+const authenticateToken = (req, res, next) => {
+  const token = req.headers['authorization']?.split(' ')[1];
+  if (!token) {
+    return res.sendStatus(401);
+  }
+
+  jwt.verify(token, SECRET_KEY, (err, user) => {
+    if (err) {
+      return res.sendStatus(403);
+    }
+    req.user = user;
+    next();
+  });
+};
+
+// Login endpoint
+app.post('/login', (req, res) => {
+  const { usuario, contrasena } = req.body;
+  console.log('Received credentials:', { usuario, contrasena });
+  const query = 'SELECT * FROM usuarios WHERE usuario = ? AND contrasena = ?';
+
+  db.query(query, [usuario, contrasena], (err, results) => {
+    if (err) {
+      console.error('Database query error:', err);
+      return res.status(500).json({ error: err.message });
+    }
+    if (results.length === 0) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    const token = jwt.sign({ usuario: results[0].usuario }, SECRET_KEY, { expiresIn: '1h' });
+    res.json({ token });
+  });
 });
 
 // Helper function to get table schema dynamically
@@ -50,7 +86,7 @@ const getTableSchema = (table) => {
 };
 
 // Route to get schema for an entity
-app.get('/schema/:entity', async (req, res) => {
+app.get('/schema/:entity', authenticateToken, async (req, res) => {
   const { entity } = req.params;
   try {
     const schema = await getTableSchema(entity);
@@ -86,7 +122,7 @@ const getForeignKeys = (table) => {
 };
 
 // Route to get foreign keys for a table
-app.get('/foreignkeys/:entity', async (req, res) => {
+app.get('/foreignkeys/:entity', authenticateToken, async (req, res) => {
   const { entity } = req.params;
   try {
     const foreignKeys = await getForeignKeys(entity);
@@ -98,7 +134,7 @@ app.get('/foreignkeys/:entity', async (req, res) => {
 });
 
 // Route to get related data for a foreign key field
-app.get('/related/:entity/:foreignKey', async (req, res) => {
+app.get('/related/:entity/:foreignKey', authenticateToken, async (req, res) => {
   const { entity, foreignKey } = req.params;
   const referencedTableQuery = `
     SELECT REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME
@@ -142,8 +178,8 @@ const getTableColumns = (table) => {
   });
 };
 
-// Route to get all table names with categories
-app.get('/tables', async (req, res) => {
+// Route to get all table names with categories (protected)
+app.get('/tables', authenticateToken, async (req, res) => {
   try {
     const query = `
       SELECT 
@@ -170,7 +206,7 @@ app.get('/tables', async (req, res) => {
 });
 
 // Generic route to get all records from any table with joins on foreign keys
-app.get('/:entity', async (req, res) => {
+app.get('/:entity', authenticateToken, async (req, res) => {
   const { entity } = req.params;
 
   try {
@@ -210,7 +246,7 @@ app.get('/:entity', async (req, res) => {
 });
 
 // Generic route to get a specific record by id from any table with joins on foreign keys
-app.get('/:entity/:id', async (req, res) => {
+app.get('/:entity/:id', authenticateToken, async (req, res) => {
   const { entity, id } = req.params;
 
   try {
@@ -250,7 +286,7 @@ app.get('/:entity/:id', async (req, res) => {
 });
 
 // Generic route to delete a specific record by id from any table
-app.delete('/:entity/:id', (req, res) => {
+app.delete('/:entity/:id', authenticateToken, (req, res) => {
   const { entity, id } = req.params;
   const query = `DELETE FROM ?? WHERE id = ?`;
   db.query(query, [entity, id], (err, results) => {
@@ -262,7 +298,7 @@ app.delete('/:entity/:id', (req, res) => {
 });
 
 // Generic route to insert a new record into any table
-app.post('/:entity', (req, res) => {
+app.post('/:entity', authenticateToken, (req, res) => {
   const { entity } = req.params;
   const data = req.body;
   const query = `INSERT INTO ?? SET ?`;
@@ -275,7 +311,7 @@ app.post('/:entity', (req, res) => {
 });
 
 // Generic route to update a specific record by id in any table
-app.put('/:entity/:id', (req, res) => {
+app.put('/:entity/:id', authenticateToken, (req, res) => {
   const { entity, id } = req.params;
   const data = req.body;
   const query = `UPDATE ?? SET ? WHERE id = ?`;
