@@ -30,3 +30,8 @@ export const getSchema = async (entity) => {
   const response = await axios.get(`http://localhost:5000/schema/${entity}`);
   return response.data;
 };
+
+export const getForeignKeys = async (entity) => {
+  const response = await axios.get(`http://localhost:5000/foreignkeys/${entity}`);
+  return response.data;
+};

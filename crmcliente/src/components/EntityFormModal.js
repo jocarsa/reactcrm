@@ -1,14 +1,16 @@
 // components/EntityFormModal.js
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
-import { create, update, getSchema } from '../services/apiService';
+import { create, update, getSchema, getForeignKeys } from '../services/apiService';
 import { mapMySQLTypeToHTMLInputType } from '../utils/fieldTypeMapper';
+import axios from 'axios';
 
 Modal.setAppElement('#root'); // Set the root element for accessibility
 
 const EntityFormModal = ({ entity, isOpen, onRequestClose, onFormSubmit, record }) => {
   const [formData, setFormData] = useState({});
   const [schema, setSchema] = useState({});
+  const [foreignKeyData, setForeignKeyData] = useState({});
 
   useEffect(() => {
     const fetchSchema = async () => {
@@ -42,6 +44,21 @@ const EntityFormModal = ({ entity, isOpen, onRequestClose, onFormSubmit, record 
     }
   }, [record, schema]);
 
+  useEffect(() => {
+    const fetchForeignKeyData = async () => {
+      const foreignKeys = await getForeignKeys(entity);
+      const foreignKeyPromises = foreignKeys.map(async fk => {
+        const response = await axios.get(`http://localhost:5000/related/${entity}/${fk.COLUMN_NAME}`);
+        return { [fk.COLUMN_NAME]: response.data };
+      });
+      const foreignKeyDataArray = await Promise.all(foreignKeyPromises);
+      const foreignKeyData = Object.assign({}, ...foreignKeyDataArray);
+      setForeignKeyData(foreignKeyData);
+    };
+
+    fetchForeignKeyData();
+  }, [entity, schema]);
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -61,6 +78,8 @@ const EntityFormModal = ({ entity, isOpen, onRequestClose, onFormSubmit, record 
     onRequestClose();
   };
 
+  const isForeignKey = (key) => Object.keys(foreignKeyData).includes(key);
+
   return (
     <Modal isOpen={isOpen} onRequestClose={onRequestClose}>
       <h2>{record ? 'Update' : 'Create'} {entity}</h2>
@@ -68,22 +87,27 @@ const EntityFormModal = ({ entity, isOpen, onRequestClose, onFormSubmit, record 
         {Object.keys(schema).map(key => (
           <div key={key}>
             <label>{key.charAt(0).toUpperCase() + key.slice(1)}:</label>
-            {mapMySQLTypeToHTMLInputType(schema[key]) === 'textarea' ? (
-              <textarea
-                name={key}
-                value={formData[key] || ''}
-                onChange={handleChange}
-                required
-              />
-            ) : mapMySQLTypeToHTMLInputType(schema[key]) === 'select' ? (
+            {isForeignKey(key) ? (
               <select
                 name={key}
                 value={formData[key] || ''}
                 onChange={handleChange}
                 required
               >
-                {/* Add options dynamically if needed */}
+                <option value="">Select...</option>
+                {foreignKeyData[key].map(option => (
+                  <option key={option.id} value={option.id}>
+                    {option.nombre}
+                  </option>
+                ))}
               </select>
+            ) : mapMySQLTypeToHTMLInputType(schema[key]) === 'textarea' ? (
+              <textarea
+                name={key}
+                value={formData[key] || ''}
+                onChange={handleChange}
+                required
+              />
             ) : (
               <input
                 type={mapMySQLTypeToHTMLInputType(schema[key])}

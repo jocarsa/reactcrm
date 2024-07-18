@@ -77,12 +77,57 @@ const getForeignKeys = (table) => {
     `;
     db.query(query, [table], (err, results) => {
       if (err) {
+        console.error('Error fetching foreign keys:', err);
         return reject(err);
       }
       resolve(results);
     });
   });
 };
+
+// Route to get foreign keys for a table
+app.get('/foreignkeys/:entity', async (req, res) => {
+  const { entity } = req.params;
+  try {
+    const foreignKeys = await getForeignKeys(entity);
+    res.json(foreignKeys);
+  } catch (error) {
+    console.error('Error in /foreignkeys/:entity route:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Route to get related data for a foreign key field
+app.get('/related/:entity/:foreignKey', async (req, res) => {
+  const { entity, foreignKey } = req.params;
+  const referencedTableQuery = `
+    SELECT REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME
+    FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+    WHERE TABLE_SCHEMA = 'crm' AND TABLE_NAME = ? AND COLUMN_NAME = ?
+  `;
+
+  db.query(referencedTableQuery, [entity, foreignKey], (err, results) => {
+    if (err) {
+      console.error('Error fetching referenced table:', err);
+      return res.status(500).json({ error: err.message });
+    }
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'Foreign key not found' });
+    }
+
+    const referencedTable = results[0].REFERENCED_TABLE_NAME;
+    const referencedColumn = results[0].REFERENCED_COLUMN_NAME;
+    const selectQuery = `SELECT ${referencedColumn} AS id, nombre FROM ${referencedTable}`;
+
+    db.query(selectQuery, (err, results) => {
+      if (err) {
+        console.error('Error fetching related data:', err);
+        return res.status(500).json({ error: err.message });
+      }
+      res.json(results);
+    });
+  });
+});
 
 // Helper function to get table columns
 const getTableColumns = (table) => {
