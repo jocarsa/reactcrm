@@ -1,4 +1,3 @@
-// services/apiService.js
 import apiClient from './apiClient';
 
 export const getAll = async (entity) => {

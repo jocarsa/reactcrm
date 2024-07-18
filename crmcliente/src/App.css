@@ -54,3 +54,6 @@ table thead{
     background:indigo;
     color:white;
 }
+ul{
+    list-style-type:none;
+}
