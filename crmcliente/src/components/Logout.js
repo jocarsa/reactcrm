@@ -1,5 +1,6 @@
 // components/Logout.js
 import React from 'react';
+import './Logout.css';
 
 const Logout = ({ setToken }) => {
   const handleLogout = () => {
@@ -7,7 +8,7 @@ const Logout = ({ setToken }) => {
   };
 
   return (
-    <button onClick={handleLogout}>Logout</button>
+    <button className="botonlogout" onClick={handleLogout}>🔒</button>
   );
 };
 

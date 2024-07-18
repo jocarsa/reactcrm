@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getAll, remove } from '../services/apiService';
 import EntityFormModal from './EntityFormModal';
+import './EntityList.css'; // Assuming you have a CSS file for styles
 
 const EntityList = ({ entity }) => {
   const [records, setRecords] = useState([]);
@@ -56,9 +57,9 @@ const EntityList = ({ entity }) => {
           <td key={key}>{record[key]}</td>
         ))}
         <td key={`operations-${record.id}`}>
-          <Link to={`/${entity}/${record.id}`}>View</Link>
-          <button onClick={() => openUpdateModal(record)}>Edit</button>
-          <button onClick={() => handleDelete(record.id)}>Delete</button>
+          <Link className="btn btn-view" to={`/${entity}/${record.id}`}>View</Link>
+          <button className="btn btn-edit" onClick={() => openUpdateModal(record)}>Edit</button>
+          <button className="btn btn-delete" onClick={() => handleDelete(record.id)}>Delete</button>
         </td>
       </tr>
     ));
@@ -66,7 +67,7 @@ const EntityList = ({ entity }) => {
 
   return (
     <div>
-      <button onClick={openModal}>Create New {entity}</button>
+      <button className="btn btn-create" onClick={openModal}>Create New {entity}</button>
       <EntityFormModal
         entity={entity}
         isOpen={modalIsOpen}

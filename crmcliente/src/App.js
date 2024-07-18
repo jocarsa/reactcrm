@@ -35,12 +35,12 @@ const App = () => {
 
   return (
     <Router>
-      <Navbar />
+      <Navbar setTokenAndStore={setTokenAndStore} />
       <main>
         {token ? (
           <>
             <Sidebar tables={tables} />
-            <Logout setToken={setTokenAndStore} />
+            
             <section>
               <Routes>
                 <Route path="/dashboard" element={<Dashboard />} />
